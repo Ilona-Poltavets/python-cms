@@ -297,4 +297,13 @@ main .content {
   padding: 10px;
 }
 
+.control-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.control-row p {
+  color: var(--gray--secondary);
+}
+
 /*# sourceMappingURL=style.css.map */
