@@ -1,16 +1,31 @@
-# This is a sample Python script.
+import os
+from pathlib import Path
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from fastapi import FastAPI,Request
+from sqlalchemy import create_engine
+from starlette.responses import HTMLResponse
+from starlette.staticfiles import StaticFiles
+from starlette.templating import Jinja2Templates
 
+from services.db_service import check_connection
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+app=FastAPI()
+POSTGRES_URL = os.getenv("POSTGRES_URL")
+engine = create_engine(POSTGRES_URL)
+templates = Jinja2Templates(directory="views")
+app.mount("/src", StaticFiles(directory="src"), name="src")
 
+@app.on_event("startup")
+async def startup_event():
+    try:
+        check_connection(engine)
+    except Exception as e:
+        print(f"⚠️ Warning: DB startup check failed: {e}")
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+@app.get("/", response_class=HTMLResponse)
+def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+@app.get("/entities", response_class=HTMLResponse)
+def read_root(request: Request):
+    return templates.TemplateResponse("entities.html", {"request": request})
